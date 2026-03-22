@@ -1,0 +1,140 @@
+@startuml Hotel Booking Class Diagram
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+class User {
+  - userID: int
+  - userName: String
+  - email: String
+  - password: String
+  - phone: String
+  - dateOfBirth: Date
+  - avatar: String
+  - roleID: int
+
+  + login(): boolean
+  + logout(): void
+  + updateProfile(): void
+}
+
+class Customer {
+  - tierID: int
+  - point: int
+  + makeBooking(): Booking
+  + searchRoom(checkin: Date, checkout: Date, type: String, occupancy: int): List<Room>
+  + viewBookingHistory(): List<Booking>
+  + trackMembership(): MembershipTier
+}
+
+class Manager {
+  + viewAllBookings(): List<Booking>
+  + updateRoomStatus(roomID: int, status: String): void
+  + updateRoomInfo(roomID: int): void
+  + viewRevenue(): double
+  + viewPotentialCustomers(): List<Customer>
+}
+
+class MembershipTier {
+  - tierID: int
+  - tierName: String
+  - minPoint: int
+  - discountRate: double
+  - benefits: String
+  + getTierByPoint(point: int): MembershipTier
+}
+
+class Booking {
+  - bookingID: int
+  - bookingDate: Date
+  - totalPrice: double
+  - status: String
+  - expiredAt: Date
+  - paymentID: int
+  + createBooking(): Booking
+  + cancelBooking(): void
+  + checkExpired(): boolean
+}
+
+class BookingDetails {
+  - bookingID: int
+  - roomID: int
+  - checkinDate: Date
+  - checkoutDate: Date
+  - subTotal: double
+  + calculateSubTotal(): double
+}
+
+class Payment {
+  - paymentID: int
+  - bookingID: int
+  - amount: double
+  - method: String
+  - paymentDate: Date
+  - transactionCode: String
+  - status: String
+  + processPayment(): boolean
+  + sendConfirmationEmail(): void
+  + refund(): boolean
+}
+
+class Rooms {
+  - roomID: int
+  - roomNumber: String
+  - typeID: int
+  - status: String
+  - description: String
+  + isAvailable(checkin: Date, checkout: Date): boolean
+  + updateStatus(status: String): void
+  + updateInfo(): void
+}
+
+class RoomTypes {
+  - typeID: int
+  - typeName: String
+  - priceRoom: double
+  - occupancy: int
+  + getRoomsByType(): List<Rooms>
+}
+
+class RoomTypeBeds {
+  - typeID: int
+  - bedID: int
+  - quantity: int
+}
+
+class Beds {
+  - bedID: int
+  - bedName: String
+  - capacity: int
+}
+
+' Inheritance (generalization)
+User <|-- Customer
+User <|-- Manager
+
+' User - MembershipTier (N-1)
+Customer "N" }o-- "1" MembershipTier : "thuộc hạng"
+
+' Customer - Booking (1-N)
+Customer "1" --o{ "N" Booking : "tạo"
+
+' Booking - BookingDetails (1-N)
+Booking "1" --|| "N" BookingDetails : "gồm"
+
+' Booking - Payment (1-N)
+Booking "1" --o{ "N" Payment : "thanh toán"
+
+' BookingDetails - Rooms (N-1)
+BookingDetails "N" }o-- "1" Rooms : "đặt"
+
+' Rooms - RoomTypes (N-1)
+Rooms "N" }o-- "1" RoomTypes : "thuộc loại"
+
+' RoomTypes - RoomTypeBeds (1-N)
+RoomTypes "1" --o{ "N" RoomTypeBeds : "cấu hình"
+
+' RoomTypeBeds - Beds (N-1)
+RoomTypeBeds "N" }o-- "1" Beds : "loại giường"
+
+@enduml
