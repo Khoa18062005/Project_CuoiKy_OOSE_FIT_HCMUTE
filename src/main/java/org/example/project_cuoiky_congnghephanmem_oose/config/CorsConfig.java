@@ -30,7 +30,6 @@ public class CorsConfig {
                 "Content-Type",
                 "Accept"
         ));
-
         // Cho phép gửi token
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);
