@@ -18,21 +18,13 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int userID;
-    private String userName;
+    private String username;
     private String email;
     private String password;
     private String phone;
+    @Setter
     private LocalDate dateOfBirth;
     private String avatar;
     private int roleID;
 
-    public boolean login() {
-        return false;
-    }
-
-    public void logout() {
-    }
-
-    public void updateProfile() {
-    }
 }
