@@ -33,7 +33,6 @@ build/
 .vscode/
 
 ### Sensitive config ###
-src/main/resources/application.properties
 src/main/resources/application-dev.properties
 
 ### Environment ###
