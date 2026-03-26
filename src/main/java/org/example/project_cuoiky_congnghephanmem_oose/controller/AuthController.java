@@ -6,12 +6,10 @@ import org.example.project_cuoiky_congnghephanmem_oose.dto.request.RegisterReque
 import org.example.project_cuoiky_congnghephanmem_oose.dto.response.AuthResponse;
 import org.example.project_cuoiky_congnghephanmem_oose.service.auth.IAuthService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@CrossOrigin(origins = "*")
 @RequestMapping("/api/auth")
 public class AuthController {
 

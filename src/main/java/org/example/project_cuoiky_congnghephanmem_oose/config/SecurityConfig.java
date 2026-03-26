@@ -29,7 +29,8 @@ public class SecurityConfig {
                                 "/api/auth/register",
                                 "/api/rooms",
                                 "/api/rooms/search",
-                                "/api/room-types"
+                                "/api/room-types",
+                                "/error"
                         ).permitAll()
 
                         // MANAGER ONLY
