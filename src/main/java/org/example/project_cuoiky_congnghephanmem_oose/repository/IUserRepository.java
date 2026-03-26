@@ -1,0 +1,15 @@
+package org.example.project_cuoiky_congnghephanmem_oose.repository;
+
+import org.example.project_cuoiky_congnghephanmem_oose.entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+// respository/IUserRepository.java
+@Repository
+public interface IUserRepository extends JpaRepository<User, Long> {
+    boolean existsByUsername(String username);
+    boolean existsByEmail(String email);
+    Optional<User> findByUsername(String username);
+}
