@@ -12,7 +12,6 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class RoomTypes {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int typeID;
