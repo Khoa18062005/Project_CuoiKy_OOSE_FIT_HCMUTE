@@ -1,0 +1,26 @@
+# =============================================
+# RAILWAY VARIABLES EXAMPLE
+# Copy nội dung này vào Variables của Railway
+# Không commit file chứa giá trị thật lên Git
+# =============================================
+
+# 1. Profile - Bắt buộc phải có
+SPRING_PROFILES_ACTIVE=prod
+
+# 2. Database Configuration (Aiven MySQL)
+SPRING_DATASOURCE_URL=jdbc:mysql://<HOST_AIVEN>:3306/<TEN_DATABASE>?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+SPRING_DATASOURCE_USERNAME=<USERNAME_AIVEN>
+SPRING_DATASOURCE_PASSWORD=<PASSWORD_AIVEN>
+
+# 3. Port (Không bắt buộc, Railway sẽ tự quản lý)
+# PORT=8080
+
+# =============================================
+# Các biến khác sau này bạn có thể thêm (ví dụ):
+# API_KEY=sk-XXXXXXXXXXXXXXXXXXXXXXXX
+# JWT_SECRET=your_jwt_secret_key_here
+# =============================================
+
+# Hướng dẫn:
+# - Thay <HOST_AIVEN>, <TEN_DATABASE>, <USERNAME_AIVEN>, <PASSWORD_AIVEN> bằng thông tin thật
+# - Sau khi paste vào Railway Variables → nhấn Deploy

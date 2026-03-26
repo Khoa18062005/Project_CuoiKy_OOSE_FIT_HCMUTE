@@ -1,0 +1,27 @@
+# =============================================
+# APPLICATION-DEV.PROPERTIES EXAMPLE
+# Copy file này thành application-dev.properties rồi điền thông tin của bạn
+# =============================================
+
+# === Database Aiven (Dev) ===
+spring.datasource.url=jdbc:mysql://<HOST_AIVEN>:3306/<TEN_DATABASE>?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+spring.datasource.username=<USERNAME_AIVEN>
+spring.datasource.password=<PASSWORD_AIVEN>
+
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+# JPA - Dev
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
+spring.jpa.hibernate.naming.physical-strategy=org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+
+# HikariCP - Dev
+spring.datasource.hikari.maximum-pool-size=5
+spring.datasource.hikari.minimum-idle=2
+spring.datasource.hikari.pool-name=HotelHikariPool
+
+# Logging (tùy chọn)
+logging.level.root=INFO
+logging.level.com.yourpackage=DEBUG     # thay yourpackage bằng package chính của bạn
