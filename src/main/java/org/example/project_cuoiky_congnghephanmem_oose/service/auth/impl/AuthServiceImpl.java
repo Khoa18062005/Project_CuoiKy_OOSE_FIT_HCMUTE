@@ -8,6 +8,7 @@ import org.example.project_cuoiky_congnghephanmem_oose.repository.IUserRepositor
 import org.example.project_cuoiky_congnghephanmem_oose.service.auth.IAuthService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import lombok.*;
 
 @Service
 public class AuthServiceImpl implements IAuthService {
@@ -29,7 +30,7 @@ public class AuthServiceImpl implements IAuthService {
         }
 
         // 2. Kiểm tra username đã tồn tại chưa
-        if (userRepository.existsByUserName(request.getUsername())) {
+        if (userRepository.existsByUsername(request.getUsername())) {
             throw new RuntimeException("Username đã tồn tại!");
         }
 
@@ -54,7 +55,7 @@ public class AuthServiceImpl implements IAuthService {
     @Override
     public AuthResponse login(LoginRequest request) {
         // 1. Tìm user theo username
-        User user = userRepository.findByUserName(request.getUsername())
+        User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new RuntimeException("Username không tồn tại!"));
 
         // 2. Kiểm tra password

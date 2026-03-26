@@ -18,34 +18,32 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http)
             throws Exception {
         http
-            .cors(Customizer.withDefaults())
-            .csrf(AbstractHttpConfigurer::disable)
-            .authorizeHttpRequests(auth -> auth
+                .cors(Customizer.withDefaults())
+                .csrf(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)  // ← thêm dòng này
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth
+                        // PUBLIC
+                        .requestMatchers(
+                                "/api/auth/login",
+                                "/api/auth/register",
+                                "/api/rooms",
+                                "/api/rooms/search",
+                                "/api/room-types"
+                        ).permitAll()
 
-                // ===== PUBLIC — Không cần đăng nhập =====
-                .requestMatchers(
-                    "/api/auth/login",
-                    "/api/auth/register",
-                    "/api/rooms",
-                    "/api/rooms/search",
-                    "/api/room-types"
-                ).permitAll()
+                        // MANAGER ONLY
+                        .requestMatchers("/api/manager/**").hasRole("MANAGER")
 
-                // ===== MANAGER ONLY =====
-                .requestMatchers(
-                    "/api/manager/**"
-                ).hasRole("MANAGER")
+                        // CUSTOMER
+                        .requestMatchers(
+                                "/api/bookings/**",
+                                "/api/payments/**",
+                                "/api/users/**"
+                        ).hasRole("CUSTOMER")
 
-                // ===== CUSTOMER — Phải đăng nhập =====
-                .requestMatchers(
-                    "/api/bookings/**",
-                    "/api/payments/**",
-                    "/api/users/**"
-                ).hasRole("CUSTOMER")
-
-                // Còn lại phải đăng nhập
-                .anyRequest().authenticated()
-            );
+                        .anyRequest().authenticated()
+                );
 
         return http.build();
     }
