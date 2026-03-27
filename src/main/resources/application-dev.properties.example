@@ -25,3 +25,6 @@ spring.datasource.hikari.pool-name=HotelHikariPool
 # Logging (tùy chọn)
 logging.level.root=INFO
 logging.level.com.yourpackage=DEBUG     # thay yourpackage bằng package chính của bạn
+
+jwt.secret=your-super-secret-key-here-make-it-long-enough
+jwt.expiration=86400000
