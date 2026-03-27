@@ -38,7 +38,9 @@ public class SecurityConfig {
                                 "/api/rooms",
                                 "/api/rooms/search",
                                 "/api/room-types",
-                                "/error"
+                                "/error",
+                                "/api/auth/forgot-password",
+                                "/api/auth/verify-otp"
                         ).permitAll()
 
                         // MANAGER ONLY

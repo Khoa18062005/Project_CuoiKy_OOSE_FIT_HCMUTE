@@ -1,10 +1,13 @@
 package org.example.project_cuoiky_congnghephanmem_oose.controller;
 
 import jakarta.validation.Valid;
+import org.example.project_cuoiky_congnghephanmem_oose.dto.request.ForgotPasswordRequest;
 import org.example.project_cuoiky_congnghephanmem_oose.dto.request.LoginRequest;
 import org.example.project_cuoiky_congnghephanmem_oose.dto.request.RegisterRequest;
+import org.example.project_cuoiky_congnghephanmem_oose.dto.request.VerifyOtpRequest;
 import org.example.project_cuoiky_congnghephanmem_oose.dto.response.AuthResponse;
 import org.example.project_cuoiky_congnghephanmem_oose.service.auth.IAuthService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,5 +31,21 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        authService.forgotPassword(request.getEmail());
+        return ResponseEntity.ok("Mã xác thực đã được gửi vào email của bạn!");
+    }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<String> verifyOtp(@RequestBody VerifyOtpRequest request) {
+        boolean isValid = authService.verifyOtp(request.getEmail(), request.getOtpCode());
+        if (isValid) {
+            return ResponseEntity.ok("Xác thực OTP thành công!");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Mã OTP không chính xác hoặc đã hết hạn!");
+        }
     }
 }

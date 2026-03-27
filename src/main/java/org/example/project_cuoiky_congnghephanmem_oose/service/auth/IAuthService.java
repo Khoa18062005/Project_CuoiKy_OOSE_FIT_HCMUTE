@@ -9,4 +9,6 @@ import org.example.project_cuoiky_congnghephanmem_oose.dto.request.LoginRequest;
 public interface IAuthService {
     AuthResponse register(RegisterRequest request);
     AuthResponse login(LoginRequest request);
+    void forgotPassword(String email);
+    boolean verifyOtp(String email, String otpCode);
 }
