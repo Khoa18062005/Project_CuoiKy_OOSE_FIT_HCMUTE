@@ -59,7 +59,8 @@ public class AuthServiceImpl implements IAuthService {
     @Override
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("Username không tồn tại!"));
+                .or(() -> userRepository.findByEmail(request.getUsername()))
+                .orElseThrow(() -> new RuntimeException("Username hoặc email không tồn tại!"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("Mật khẩu không đúng!");
