@@ -8,6 +8,8 @@ import org.example.project_cuoiky_congnghephanmem_oose.entity.User;
 import org.example.project_cuoiky_congnghephanmem_oose.repository.ICustomerRepository;
 import org.example.project_cuoiky_congnghephanmem_oose.repository.IUserRepository;
 import org.example.project_cuoiky_congnghephanmem_oose.service.auth.IAuthService;
+import org.example.project_cuoiky_congnghephanmem_oose.service.auth.IEmailService;
+import org.example.project_cuoiky_congnghephanmem_oose.service.auth.IOtpService;
 import org.example.project_cuoiky_congnghephanmem_oose.util.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,15 +21,21 @@ public class AuthServiceImpl implements IAuthService {
     private final ICustomerRepository customerRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil; // ← thêm
+    private final IEmailService emailService;
+    private final IOtpService otpService;
 
     public AuthServiceImpl(IUserRepository userRepository,
                            ICustomerRepository customerRepository,
                            PasswordEncoder passwordEncoder,
-                           JwtUtil jwtUtil) { // ← thêm
+                           JwtUtil jwtUtil,
+                           IEmailService emailService, // <--- THÊM VÀO THAM SỐ
+                           IOtpService otpService) { // ← thêm
         this.userRepository = userRepository;
         this.customerRepository = customerRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
+        this.emailService = emailService;
+        this.otpService = otpService;
     }
 
     @Override
@@ -72,5 +80,25 @@ public class AuthServiceImpl implements IAuthService {
         String token = jwtUtil.generateToken(user.getUsername(), role); // ← truyền role
 
         return new AuthResponse("Đăng nhập thành công!", token, user.getUsername());
+    }
+    // Triển khai logic quên mật khẩu
+    @Override
+    public void forgotPassword(String email) {
+        // 1. Kiểm tra email có tồn tại trong hệ thống không
+        if (!userRepository.existsByEmail(email)) {
+            throw new RuntimeException("Email không tồn tại trong hệ thống!");
+        }
+
+        // 2. Tạo mã OTP (dùng OtpService)
+        String otp = otpService.generateOtp(email);
+
+        // 3. Gửi mail (dùng EmailService)
+        emailService.sendOtpEmail(email, otp);
+    }
+
+    // Triển khai logic Xác thực mã
+    @Override
+    public boolean verifyOtp(String email, String otpCode) {
+        return otpService.validateOtp(email, otpCode);
     }
 }
