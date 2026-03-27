@@ -6,20 +6,23 @@ import org.example.project_cuoiky_congnghephanmem_oose.dto.response.AuthResponse
 import org.example.project_cuoiky_congnghephanmem_oose.entity.User;
 import org.example.project_cuoiky_congnghephanmem_oose.repository.IUserRepository;
 import org.example.project_cuoiky_congnghephanmem_oose.service.auth.IAuthService;
+import org.example.project_cuoiky_congnghephanmem_oose.util.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import lombok.*;
 
 @Service
 public class AuthServiceImpl implements IAuthService {
 
     private final IUserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil; // ← thêm
 
     public AuthServiceImpl(IUserRepository userRepository,
-                           PasswordEncoder passwordEncoder) {
+                           PasswordEncoder passwordEncoder,
+                           JwtUtil jwtUtil) { // ← thêm
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     @Override
@@ -54,15 +57,16 @@ public class AuthServiceImpl implements IAuthService {
 
     @Override
     public AuthResponse login(LoginRequest request) {
-        // 1. Tìm user theo username
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new RuntimeException("Username không tồn tại!"));
 
-        // 2. Kiểm tra password
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("Mật khẩu không đúng!");
         }
 
-        return new AuthResponse("Đăng nhập thành công!", null, user.getUsername());
+        // Tạo JWT token ← thêm dòng này
+        String token = jwtUtil.generateToken(user.getUsername());
+
+        return new AuthResponse("Đăng nhập thành công!", token, user.getUsername());
     }
 }
