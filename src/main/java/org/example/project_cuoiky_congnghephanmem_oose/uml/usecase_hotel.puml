@@ -14,7 +14,7 @@ rectangle "Hệ thống đặt phòng khách sạn" {
 
   package "Chức năng công khai" {
     usecase "Xem danh sách phòng trống" as UC1
-    usecase "Tìm kiếm phòng\n(ngày, loại phòng, số người)" as UC4
+    usecase "Tìm kiếm phòng\n(ngày, loại phòng, số lượng phòng, số người)" as UC4
     usecase "Đăng ký tài khoản" as UC2
   }
 
@@ -26,6 +26,7 @@ rectangle "Hệ thống đặt phòng khách sạn" {
     usecase "Xem lịch sử đặt phòng" as UC8
     usecase "Xem & cập nhật thông tin cá nhân\n(tên, email, SĐT, ngày sinh, avatar)" as UC9
     usecase "Theo dõi hạng thành viên\n& điểm tích lũy" as UC10
+    usecase "Quản lý tài khoản cá nhân" as UC17
   }
 
   package "Chức năng quản lý" {
@@ -34,31 +35,38 @@ rectangle "Hệ thống đặt phòng khách sạn" {
     usecase "Điều chỉnh thông tin phòng\n(giá, loại, sức chứa)" as UC13
     usecase "Xem tổng doanh thu" as UC14
     usecase "Xem khách hàng tiềm năng" as UC15
+    usecase "Quản lý phòng" as UC16
   }
 }
 
+' Guest associations
 Guest --> UC1
 Guest --> UC2
 Guest --> UC4
 
+' Customer associations – now only to the new account management and the other main use cases
 Customer --> UC3
 Customer --> UC5
 Customer --> UC6
 Customer --> UC8
-Customer --> UC9
-Customer --> UC10
+Customer --> UC17
 
+' Manager associations – now only to the new room management and the other main use cases
+Manager --> UC11
+Manager --> UC14
+Manager --> UC15
+Manager --> UC16
+
+' Include relationships
 UC5 .> UC3 : <<include>>
 UC6 .> UC5 : <<include>>
 UC7 .> UC6 : <<include>>
 UC8 .> UC3 : <<include>>
 UC9 .> UC3 : <<include>>
 UC10 .> UC3 : <<include>>
-
-Manager --> UC11
-Manager --> UC12
-Manager --> UC13
-Manager --> UC14
-Manager --> UC15
+UC17 .> UC9 : <<include>>
+UC17 .> UC10 : <<include>>
+UC16 .> UC12 : <<include>>
+UC16 .> UC13 : <<include>>
 
 @enduml

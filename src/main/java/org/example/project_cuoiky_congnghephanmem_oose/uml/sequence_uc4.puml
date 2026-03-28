@@ -1,0 +1,32 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam ParticipantPadding 20
+
+actor "Người dùng" as User
+participant "Room Search Form\n(room search page + JS)" as Frontend
+participant "RoomController" as Controller
+participant "RoomServiceImpl" as Service
+participant "IRoomRepository" as Repo
+
+User -> Frontend: 1. Chọn checkin, checkout, guests,\nnumberOfRooms, roomType + submit
+Frontend -> Frontend: 2. searchRooms(params) (room search js)
+Frontend -> Controller: 3. GET /api/rooms/search?checkin=...&checkout=...&guests=...&numberOfRooms=...&roomType=...
+Controller -> Service: 4. searchAvailableRooms(RoomSearchRequest request)
+Service -> Service: 5. validateSearchRequest() → check ngày, guests, rooms
+alt Validation fail
+    Service --> Controller: 6. throw AppException
+    Controller --> Frontend: 7. 400 + error message
+else
+    Service -> Service: 8. normalizeRoomType() (all → null)
+    Service -> Service: 9. guestsPerRoom = ceil(guests / numberOfRooms)
+    Service -> Repo: 10. findAvailableRooms(checkin, checkout, roomType, guestsPerRoom)
+    Repo --> Service: 11. List<Rooms> (query JPQL)
+    Service -> Service: 12. totalFound = list.size()
+    Service -> Service: 13. enough = totalFound >= numberOfRooms
+    Service -> Service: 14. limit(requested) → List<RoomResponse>
+    Service -> Service: 15. build RoomSearchResponse (totalFound, requested, enough, warning, rooms)
+    Service --> Controller: 16. RoomSearchResponse
+    Controller --> Frontend: 17. 200 OK + JSON
+    Frontend -> Frontend: 18. renderRooms(data) → hiển thị card phòng
+end
+@enduml

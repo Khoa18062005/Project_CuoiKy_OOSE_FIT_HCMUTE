@@ -1,0 +1,38 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam ParticipantPadding 20
+skinparam BoxPadding 10
+
+actor "Người dùng" as User
+participant "Register Form\n(register.html + register.js)" as Frontend
+participant "RegisterService\n(JS class)" as JSService
+participant "AuthController" as Controller
+participant "AuthServiceImpl" as Service
+participant "PasswordEncoder" as Encoder
+participant "IUserRepository" as UserRepo
+participant "ICustomerRepository" as CustomerRepo
+
+User -> Frontend: 1. Nhập thông tin + submit form
+Frontend -> JSService: 2. registerForm.addEventListener('submit')
+JSService -> Controller: 3. fetch POST /api/auth/register\n(RegisterRequest JSON)
+Controller -> Service: 4. register(@Valid RegisterRequest request)
+Service -> Service: 5. if (!password.equals(confirmPassword)) throw
+Service -> UserRepo: 6. existsByUsername(username)
+Service -> UserRepo: 7. existsByEmail(email)
+alt Username hoặc Email đã tồn tại
+    Service --> Controller: 8. throw RuntimeException
+    Controller --> JSService: 9. 400 + error message
+    JSService --> Frontend: 10. notify.show("Username/Email đã tồn tại")
+else
+    Service -> Service: 11. Tạo Customer object
+    Service -> Encoder: 12. encode(password) → BCrypt
+    Service -> Service: 13. set roleID = 1 (CUSTOMER)
+    Service -> CustomerRepo: 14. save(customer)
+    CustomerRepo --> Service: 15. Customer saved
+    Service -> Service: 16. new AuthResponse("Đăng ký thành công!")
+    Service --> Controller: 17. AuthResponse
+    Controller --> JSService: 18. 200 OK + JSON
+    JSService --> Frontend: 19. notify.show("Đăng ký thành công!")
+    Frontend --> User: 20. redirect login.html (sau 2s)
+end
+@enduml

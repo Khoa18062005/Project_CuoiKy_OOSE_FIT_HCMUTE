@@ -1,0 +1,25 @@
+@startuml
+start
+:Người dùng mở Login.html;
+:Nhập username/email + password;
+:LoginService.loginUser();
+:Gửi POST /api/auth/login;
+:AuthController.login();
+:AuthServiceImpl.login();
+if (userRepository.findByUsername hoặc findByEmail?) then (tìm thấy)
+    if (passwordEncoder.matches?) then (đúng)
+        :Xác định role (MANAGER/CUSTOMER);
+        :JwtUtil.generateToken(username, role);
+        :Trả AuthResponse + token;
+        :Frontend lưu JWT + current_user vào localStorage;
+        :notify success → redirect index.html;
+    else (sai)
+        :throw "Mật khẩu không đúng!";
+        :notify lỗi;
+    endif
+else (không tìm thấy)
+    :throw "Username hoặc email không tồn tại!";
+    :notify lỗi;
+endif
+stop
+@enduml
