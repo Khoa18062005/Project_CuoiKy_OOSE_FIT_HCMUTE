@@ -1,0 +1,34 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam ParticipantPadding 20
+
+actor "Người dùng" as User
+participant "Login Form\n(login.html + login.js)" as Frontend
+participant "LoginService\n(JS class)" as JSService
+participant "AuthController" as Controller
+participant "AuthServiceImpl" as Service
+participant "IUserRepository" as UserRepo
+participant "PasswordEncoder" as Encoder
+participant "JwtUtil" as Jwt
+
+User -> Frontend: 1. Nhập username/email + password + submit
+Frontend -> JSService: 2. loginForm.addEventListener('submit')
+JSService -> Controller: 3. fetch POST /api/auth/login\n(LoginRequest JSON)
+Controller -> Service: 4. login(@Valid LoginRequest request)
+Service -> UserRepo: 5. findByUsername() or findByEmail()
+Service -> Encoder: 6. matches(password, user.password)
+alt Sai mật khẩu
+    Service --> Controller: 7. throw RuntimeException
+    Controller --> JSService: 8. 401/403
+    JSService --> Frontend: 9. notify "Tên đăng nhập hoặc mật khẩu không chính xác"
+else
+    Service -> Service: 10. role = (roleID==2) ? "MANAGER" : "CUSTOMER"
+    Service -> Jwt: 11. generateToken(username, role)
+    Service -> Service: 12. new AuthResponse("Đăng nhập thành công!", token, username)
+    Service --> Controller: 13. AuthResponse
+    Controller --> JSService: 14. 200 OK + JSON
+    JSService -> JSService: 15. localStorage.setItem('jwt_token', token)
+    JSService -> JSService: 16. localStorage.setItem('current_user', username)
+    JSService --> Frontend: 17. notify success + redirect index.html
+end
+@enduml

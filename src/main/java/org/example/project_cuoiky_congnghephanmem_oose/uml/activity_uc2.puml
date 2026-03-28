@@ -1,0 +1,43 @@
+@startuml
+start
+:Người dùng mở Register.html;
+:Nhập username, email, phone, dateOfBirth,\npassword, confirmPassword;
+if (password == confirmPassword?) then (yes)
+    :passwordChecker.validate() (CheckPW.js);
+    if (độ mạnh mật khẩu OK?) then (yes)
+        :RegisterService.registerUser(userData);
+        :Gửi POST /api/auth/register;
+        :AuthController.register();
+        :@Valid RegisterRequest (validation);
+        if (validation pass?) then (yes)
+            :AuthServiceImpl.register();
+            if (userRepository.existsByUsername?) then (yes)
+                :throw "Username đã tồn tại!";
+                :GlobalExceptionHandler → 400;
+                stop
+            else (no)
+                if (existsByEmail?) then (yes)
+                    :throw "Email đã được sử dụng!";
+                    stop
+                else (no)
+                    :Tạo Customer entity;
+                    :password = BCryptPasswordEncoder.encode();
+                    :roleID = 1;
+                    :customerRepository.save();
+                    :return AuthResponse("Đăng ký thành công!");
+                    :Frontend notify success;
+                    :Redirect login.html;
+                endif
+            endif
+        else (no)
+            :GlobalExceptionHandler.handleValidation();
+            :Hiển thị lỗi từng trường (error-username, error-email...);
+        endif
+    else (no)
+        :Hiển thị gợi ý mật khẩu;
+    endif
+else (no)
+    :Hiển thị "Mật khẩu xác nhận không khớp!";
+endif
+stop
+@enduml

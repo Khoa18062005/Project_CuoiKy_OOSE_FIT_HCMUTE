@@ -1,0 +1,26 @@
+@startuml
+start
+:Người dùng mở trang tìm kiếm phòng;
+:Chọn checkin, checkout, guests, numberOfRooms, roomType;
+:Nhấn "Tìm kiếm phòng";
+:Room search JS → searchRooms(params);
+:Gửi GET /api/rooms/search;
+:RoomController.searchRooms();
+:RoomServiceImpl.searchAvailableRooms();
+:validateSearchRequest() → check ngày trong quá khứ,\ncheckout > checkin, guests 1-10, rooms 1-10;
+if (validation pass?) then (yes)
+    :normalizeRoomType();
+    :guestsPerRoom = Math.ceil(guests / numberOfRooms);
+    :IRoomRepository.findAvailableRooms(...) (JPQL query);
+    :Lấy danh sách phòng available + đủ occupancy;
+    :Tính totalFound, enough, warning;
+    :Chuyển thành List<RoomResponse> (limit số phòng yêu cầu);
+    :Trả RoomSearchResponse (totalFound, requested, enough, warning, rooms);
+    :Frontend renderRooms() → hiển thị danh sách card;
+else (no)
+    :AppException (INVALID_DATE_RANGE / INVALID_CHECKIN_DATE / ...);
+    :GlobalExceptionHandler → trả lỗi 400;
+    :Hiển thị thông báo lỗi;
+endif
+stop
+@enduml
