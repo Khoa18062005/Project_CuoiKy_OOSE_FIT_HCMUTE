@@ -1,0 +1,43 @@
+@startuml
+skinparam sequenceArrowThickness 2
+actor "Khách hàng" as User
+participant "profile.html + ProfileService (JS)" as Frontend
+participant "UserController" as Controller
+participant "UserServiceImpl" as Service
+participant "ICustomerRepository" as CustomerRepo
+participant "IMembershipTierRepository" as TierRepo
+participant "IAvatarService" as AvatarService
+
+User -> Frontend: 1. Click "Tài khoản" trên header
+Frontend -> Controller: 2. GET /api/users/me
+Controller -> Service: 3. getMyProfile(username)
+Service -> CustomerRepo: 4. findByUsername(username)
+Service -> TierRepo: 5. findTopByMinPointLessThanEqualOrderByMinPointDesc(point)
+Service -> Service: 6. refreshTier() + setMembershipTier
+Service --> Controller: 7. UserProfileResponse
+Controller --> Frontend: 8. 200 OK + JSON
+Frontend -> Frontend: 9. renderProfile() (sidebar, form, membership grid)
+
+== Upload Avatar ==
+User -> Frontend: 10. Chọn file avatar + nhấn "Tải ảnh lên"
+Frontend -> AvatarService: 11. handleUploadAvatar()
+AvatarService -> Controller: 12. POST /api/users/me/avatar (MultipartFile)
+Controller -> AvatarServiceImpl: 13. uploadAvatar(file, username)
+AvatarServiceImpl -> CustomerRepo: 14. findByUsername()
+AvatarServiceImpl -> Cloudinary: 15. uploader().upload()
+AvatarServiceImpl -> CustomerRepo: 16. save(customer) với avatarUrl mới
+AvatarServiceImpl --> Controller: 17. AvatarUploadResponse
+Controller --> Frontend: 18. 200 OK
+Frontend -> Frontend: 19. Cập nhật preview + localStorage + dispatch "profile-updated"
+
+== Cập nhật Thông tin ==
+User -> Frontend: 20. Chỉnh sửa thông tin + nhấn "Lưu thay đổi"
+Frontend -> Controller: 21. PUT /api/users/me (UpdateProfileRequest)
+Controller -> Service: 22. updateMyProfile(username, request)
+Service -> CustomerRepo: 23. findByUsername() + save()
+Service --> Controller: 24. UserProfileResponse mới
+Controller --> Frontend: 25. 200 OK
+Frontend -> Frontend: 26. renderProfile() + updateHeaderUI()
+
+User <-- Frontend: 27. Hoàn tất quản lý tài khoản cá nhân
+@enduml

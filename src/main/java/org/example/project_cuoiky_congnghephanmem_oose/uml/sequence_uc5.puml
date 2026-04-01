@@ -1,0 +1,25 @@
+@startuml
+actor "Khách hàng" as User
+participant "RoomSearchService (JS)" as Frontend
+participant "BookingController" as Controller
+participant "BookingServiceImpl" as Service
+participant "ICustomerRepository" as CustomerRepo
+participant "IMembershipTierRepository" as TierRepo
+participant "IRoomRepository" as RoomRepo
+participant "IBookingRepository" as BookingRepo
+
+User -> Frontend: 1. Chọn phòng + nhấn "Tạo booking"
+Frontend -> Frontend: 2. Kiểm tra token
+Frontend -> Controller: 3. POST /api/bookings (CreateBookingRequest)
+Controller -> Service: 4. createBooking(username, request)
+Service -> CustomerRepo: 5. findByUsername(username)
+Service -> TierRepo: 6. getCustomerDiscountRate() → findTopByMinPoint...
+Service -> RoomRepo: 7. findAllByRoomIds(roomIds)
+Service -> RoomRepo: 8. findAvailableRooms(...) (kiểm tra trùng lịch)
+Service -> Service: 9. Tính nights + tổng tiền SAU GIẢM GIÁ
+Service -> Service: 10. Tạo Booking + List<BookingDetails>
+Service -> BookingRepo: 11. save(booking)
+Service --> Controller: 12. CreateBookingResponse (có discountRate, discountInfo)
+Controller --> Frontend: 13. 200 OK
+Frontend -> Frontend: 14. notify + redirectToVnpay(bookingID)
+@enduml

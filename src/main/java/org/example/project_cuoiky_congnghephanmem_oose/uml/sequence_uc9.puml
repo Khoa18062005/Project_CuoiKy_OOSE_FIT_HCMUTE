@@ -1,0 +1,19 @@
+@startuml
+actor "Khách hàng" as User
+participant "ProfileService" as Frontend
+participant "UserController" as Controller
+participant "UserServiceImpl" as Service
+participant "ICustomerRepository" as Repo
+
+User -> Frontend: 1. Chỉnh sửa thông tin cá nhân
+Frontend -> Controller: 2. PUT /api/users/me (UpdateProfileRequest)
+Controller -> Service: 3. updateMyProfile(username, request)
+Service -> Repo: 4. findByUsername(username)
+Service -> Service: 5. Cập nhật các trường không rỗng
+Service -> Repo: 6. save(customer)
+Service -> Service: 7. return getMyProfile()
+Service --> Controller: 8. UserProfileResponse mới
+Controller --> Frontend: 9. 200 OK
+Frontend -> Frontend: 10. renderProfile() + updateHeaderUI()
+Frontend --> User: 11. Thông tin đã được cập nhật
+@enduml

@@ -1,0 +1,28 @@
+@startuml
+start
+:Người dùng truy cập room.html hoặc click "Phòng trống";
+:RoomSearchService khởi tạo hoặc người dùng click tab "Phòng trống";
+if (Có gọi API tìm kiếm không?) then (yes)
+    :Nhập điều kiện tìm kiếm (checkin, checkout, guests, numberOfRooms, roomType);
+    :Gọi handleSearch() → gửi GET /api/rooms/search;
+else (no)
+    :Gọi API GET /api/rooms (hoặc search với tham số mặc định);
+endif
+
+:RoomController.getAllRooms() hoặc searchRooms();
+:RoomServiceImpl.searchAvailableRooms() hoặc getAvailableRooms();
+:IRoomRepository.findAvailableRooms() với JPQL query;
+:Query lọc: status = 'available', occupancy đủ, không bị trùng lịch booking pending/confirmed;
+
+if (Có phòng phù hợp?) then (yes)
+    :Trả RoomSearchResponse (totalFound, requested, enough, warning, List<Rooms>);
+    :Frontend renderRooms() → tạo card phòng đẹp;
+    :Hiển thị danh sách phòng trống + giá / đêm;
+else (no)
+    :Trả danh sách rỗng + warning message;
+    :Hiển thị "Không có phòng trống phù hợp trong khoảng thời gian này";
+endif
+
+:Người dùng có thể lọc lại hoặc chọn phòng để đặt;
+stop
+@enduml

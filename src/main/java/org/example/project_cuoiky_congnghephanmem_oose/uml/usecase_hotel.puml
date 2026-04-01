@@ -68,5 +68,6 @@ UC17 .> UC9 : <<include>>
 UC17 .> UC10 : <<include>>
 UC16 .> UC12 : <<include>>
 UC16 .> UC13 : <<include>>
+UC17 .> UC8 : <<include>>
 
 @enduml

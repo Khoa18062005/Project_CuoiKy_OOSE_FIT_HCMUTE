@@ -1,0 +1,41 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam ParticipantPadding 20
+
+actor "Khách hàng" as User
+participant "ProfileService (JS)" as Frontend
+participant "UserController" as Controller
+participant "UserServiceImpl" as Service
+participant "ICustomerRepository" as CustomerRepo
+participant "IMembershipTierRepository" as TierRepo
+
+User -> Frontend: 1. Truy cập profile.html → xem phần Hạng thành viên
+Frontend -> Controller: 2. GET /api/users/me
+Controller -> Service: 3. getMyProfile(username)
+
+Service -> CustomerRepo: 4. findByUsername(username)
+Service -> TierRepo: 5. findTopByMinPointLessThanEqualOrderByMinPointDesc(point)
+Service -> Service: 6. refreshTier() → setMembershipTier nếu có
+Service -> Service: 7. Xây dựng UserProfileResponse\n(membershipTier, point, discountRate, benefits)
+
+Service --> Controller: 8. UserProfileResponse
+Controller --> Frontend: 9. 200 OK + JSON
+
+Frontend -> Frontend: 10. renderProfile()
+note right of Frontend
+  - Hiển thị tierBadge
+  - Hiển thị membershipPoint
+  - Hiển thị membershipDiscount
+    (Math.round(discountRate*100) + "%")
+  - Hiển thị membershipBenefitsText
+end note
+
+== Trường hợp thanh toán thành công ==
+alt Khi thanh toán thành công (từ payment-result.html)
+    PaymentService -> Service: 11. Cập nhật point + refresh tier
+    Service -> TierRepo: 12. findTopByMinPointLessThanEqualOrderByMinPointDesc(point mới)
+    Service -> CustomerRepo: 13. save(customer)
+end
+
+User <-- Frontend: 14. Xem rõ hạng thành viên, điểm tích lũy, mức giảm giá & quyền lợi
+@enduml

@@ -1,0 +1,25 @@
+@startuml
+start
+:Người dùng chọn phòng từ danh sách → nhấn "Tạo booking";
+:RoomSearchService.handleCreateBooking();
+:Kiểm tra đã đăng nhập chưa (jwt_token);
+if (Chưa login?) then (yes)
+    :Chuyển hướng login.html;
+    stop
+endif
+
+:Gửi POST /api/bookings với CreateBookingRequest (checkin, checkout, roomIds, guests, numberOfRooms);
+:BookingController.createBooking();
+:BookingServiceImpl.createBooking(username, request);
+:ICustomerRepository.findByUsername();
+:IMembershipTierRepository → lấy discountRate;
+:IRoomRepository.findAllByRoomIds() + findAvailableRooms() (kiểm tra còn trống);
+:Tính tổng tiền SAU GIẢM GIÁ (originalPrice * (1 - discountRate) * nights);
+:Tạo Booking (status=pending, expiredAt = now + 15 phút);
+:Tạo BookingDetails với subTotal đã giảm;
+:Lưu vào database;
+
+:Trả CreateBookingResponse (bookingID, totalPrice, message có thông tin giảm giá);
+:Frontend notify thành công + gọi redirectToVnpay();
+stop
+@enduml
