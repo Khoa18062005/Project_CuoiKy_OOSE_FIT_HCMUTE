@@ -1,0 +1,29 @@
+@startuml
+title Xem Khách Hàng Tiềm Năng
+
+start
+:Manager click tab "Khách hàng tiềm năng";
+:loadPotentialCustomers();
+:GET /api/manager/potential-customers;
+:PotentialCustomerServiceImpl.getPotentialCustomers();
+:findPotentialCustomers();
+
+if (Có dữ liệu?) then (Không)
+    :Hiển thị "Không có dữ liệu";
+    stop
+else (Có)
+    :Map sang PotentialCustomerResponse;
+    :Trả dữ liệu về Frontend;
+    :Tính điểm tích lũy;
+    :Xác định hạng thành viên;
+    :Render bảng khách hàng;
+    :Hiển thị danh sách;
+
+    if (Manager click "Làm mới"?) then (Có)
+        :loadPotentialCustomers();
+    else (Không)
+        stop
+    endif
+endif
+
+@enduml
