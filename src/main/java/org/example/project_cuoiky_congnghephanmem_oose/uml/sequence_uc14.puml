@@ -1,0 +1,42 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam ParticipantPadding 20
+
+actor "Manager" as User
+participant "AdminDashboard\n(JS class)" as Dashboard
+participant "ApiService\n(JS class)" as ApiService
+participant "JwtAuthFilter" as JwtFilter
+participant "ManagerController" as Controller
+participant "RevenueServiceImpl" as Service
+participant "IBookingRepository" as Repo
+
+User -> Dashboard: 1. Vào tab "Xem tổng doanh thu"
+Dashboard -> ApiService: 2. loadRevenueData('week')
+ApiService -> JwtFilter: 3. GET /api/manager/revenue?period=week\nAuthorization: Bearer <token>
+JwtFilter -> JwtFilter: 4. validateToken() + extractRole()\nset SecurityContext (ROLE_MANAGER)
+JwtFilter -> Controller: 5. Chuyển request
+Controller -> Service: 6. getRevenue("week")
+Service -> Service: 7. getFromDate("week") → now - 7 ngày
+Service -> Repo: 8. findByBookingDateBetweenAndStatus(from, to, "confirmed")
+Repo --> Service: 9. List<Booking>
+Service -> Service: 10. Tính totalRevenue, totalBookings\nbookedRoomsCount, avgDailyRevenue\ngroup theo ngày → chartData
+Service --> Controller: 11. RevenueResponse
+Controller --> ApiService: 12. 200 OK + JSON
+ApiService --> Dashboard: 13. data
+Dashboard -> Dashboard: 14. Cập nhật stat cards
+Dashboard -> Dashboard: 15. renderChart(labels, values, 'week')
+Dashboard --> User: 16. Hiển thị biểu đồ + stats
+
+User -> Dashboard: 17. Click filter "Tháng này"
+Dashboard -> ApiService: 18. loadRevenueData('month')
+ApiService -> Controller: 19. GET /api/manager/revenue?period=month
+Controller -> Service: 20. getRevenue("month")
+Service -> Repo: 21. findByBookingDateBetweenAndStatus(from, to, "confirmed")
+Repo --> Service: 22. List<Booking>
+Service --> Controller: 23. RevenueResponse
+Controller --> ApiService: 24. 200 OK + JSON
+ApiService --> Dashboard: 25. data mới
+Dashboard -> Dashboard: 26. revenueChartInstance.destroy()
+Dashboard -> Dashboard: 27. renderChart() lại
+Dashboard --> User: 28. Cập nhật biểu đồ + stats
+@enduml

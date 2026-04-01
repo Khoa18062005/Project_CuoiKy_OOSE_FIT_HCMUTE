@@ -1,0 +1,23 @@
+@startuml
+start
+:Manager vào tab "Xem tổng doanh thu";
+:loadRevenueData('week') mặc định;
+:GET /api/manager/revenue?period=week\nAuthorization: Bearer <token>;
+:RevenueServiceImpl.getRevenue(period);
+:getFromDate(period)\nweek → now-7 ngày\nmonth → đầu tháng\nyear → đầu năm\nall → null;
+:findByBookingDateBetweenAndStatus\n(from, to, "confirmed");
+:Tính totalRevenue, totalBookings\nbookedRoomsCount, avgDailyRevenue;
+:Group booking theo ngày → chartData;
+:Trả RevenueResponse về Frontend;
+:Cập nhật stat cards trên UI;
+:renderChart() vẽ biểu đồ;
+:Hiển thị biểu đồ + stats;
+if (Manager click filter?) then (có)
+    :Đổi active button;
+    :revenueChartInstance.destroy();
+    :loadRevenueData(period mới);
+    :Lặp lại từ bước gọi API;
+else (không)
+    stop
+endif
+@enduml
