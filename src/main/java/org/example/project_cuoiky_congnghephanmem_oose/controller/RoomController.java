@@ -42,4 +42,14 @@ public class RoomController {
         // Nếu Frontend không truyền (hoặc mới load trang) thì dùng hàm mặc định của bạn
         return ResponseEntity.ok(roomManagementService.getAllRooms());
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<RoomDetailResponse> updateRoom(
+            @PathVariable("id") int id,
+            @RequestBody org.example.project_cuoiky_congnghephanmem_oose.dto.request.UpdateRoomRequest request) {
+
+        // Gọi xuống tầng Service để xử lý logic và lưu DB
+        RoomDetailResponse updatedRoom = roomManagementService.updateRoom(id, request);
+        return ResponseEntity.ok(updatedRoom);
+    }
 }
