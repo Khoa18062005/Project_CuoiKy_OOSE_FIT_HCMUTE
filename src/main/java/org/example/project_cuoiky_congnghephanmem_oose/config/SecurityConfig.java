@@ -16,37 +16,35 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final JwtAuthFilter jwtAuthFilter; // ← thêm
+    private final JwtAuthFilter jwtAuthFilter;
 
-    public SecurityConfig(JwtAuthFilter jwtAuthFilter) { // ← thêm constructor
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http)
-            throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
-                .formLogin(AbstractHttpConfigurer::disable)  // ← thêm dòng này
+                .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        // PUBLIC
                         .requestMatchers(
+                                "/",
+                                "/error",
                                 "/api/auth/login",
                                 "/api/auth/register",
+                                "/api/auth/forgot-password",
+                                "/api/auth/verify-otp",
                                 "/api/rooms",
                                 "/api/rooms/search",
                                 "/api/room-types",
-                                "/error",
-                                "/api/auth/forgot-password",
-                                "/api/auth/verify-otp"
+                                "/api/payments/vnpay-return"
                         ).permitAll()
 
-                        // MANAGER ONLY
                         .requestMatchers("/api/manager/**").hasRole("MANAGER")
 
-                        // CUSTOMER
                         .requestMatchers(
                                 "/api/bookings/**",
                                 "/api/payments/**",
@@ -54,10 +52,12 @@ public class SecurityConfig {
                         ).hasRole("CUSTOMER")
 
                         .anyRequest().authenticated()
-                ).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                )
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

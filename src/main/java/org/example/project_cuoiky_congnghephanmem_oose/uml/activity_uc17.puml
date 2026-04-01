@@ -1,0 +1,33 @@
+@startuml
+start
+
+:Khách hàng đã đăng nhập → click "Tài khoản" trên header;
+:Mở profile.html;
+:ProfileService.init();
+:Frontend gọi GET /api/users/me;
+:UserController.getMyProfile(authentication);
+:UserServiceImpl.getMyProfile(username);
+
+:ICustomerRepository.findByUsername(username);
+:UserServiceImpl.refreshTier() → gọi IMembershipTierRepository.findTopByMinPointLessThanEqualOrderByMinPointDesc(point);
+:Xây dựng UserProfileResponse\n(avatar, username, email, phone, dateOfBirth, point,\nmembershipTier, discountRate, benefits);
+
+:Frontend renderProfile() → hiển thị sidebar + form thông tin cá nhân + phần hạng thành viên;
+
+:Người dùng thực hiện các hành động;
+fork
+  :Upload avatar → POST /api/users/me/avatar;
+  :AvatarServiceImpl.uploadAvatar() → Cloudinary upload;
+fork again
+  :Cập nhật thông tin → PUT /api/users/me;
+  :UserServiceImpl.updateMyProfile() → cập nhật username, email, phone, dateOfBirth;
+fork again
+  :Xem lịch sử booking → GET /api/users/me/bookings;
+  :UserServiceImpl.getMyBookingHistory() → syncExpiredBooking() + render;
+end fork
+
+:ProfileService cập nhật UI (avatar, thông tin, tier, point, benefits);
+:Header.js nhận event "profile-updated" → cập nhật username + avatar trên header;
+
+stop
+@enduml

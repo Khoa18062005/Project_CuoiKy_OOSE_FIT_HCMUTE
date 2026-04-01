@@ -1,0 +1,15 @@
+@startuml
+start
+:Thanh toán VNPay trả về responseCode = "00";
+:PaymentServiceImpl.handleVnPayReturn();
+:Validate chữ ký VNPay;
+:Cập nhật Payment status = success;
+:Booking status = confirmed;
+:Tính earnedPoint = floor(totalPrice / 100000);
+:Cập nhật điểm khách hàng + refresh MembershipTier;
+:EmailServiceImpl.sendBookingConfirmationEmail();
+:Xây dựng HTML email chuyên nghiệp (logo, bảng phòng, tổng tiền, mã booking);
+:Gửi email qua JavaMailSender (MimeMessage);
+:Khách hàng nhận email → click xem chi tiết hoặc vào profile;
+stop
+@enduml

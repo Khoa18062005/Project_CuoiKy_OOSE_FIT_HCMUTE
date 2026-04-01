@@ -1,0 +1,21 @@
+package org.example.project_cuoiky_congnghephanmem_oose.dto.response;
+
+import lombok.Builder;
+import lombok.Data;
+
+import java.time.LocalDate;
+
+@Data
+@Builder
+public class UserProfileResponse {
+    private int userID;
+    private String username;
+    private String email;
+    private String phone;
+    private LocalDate dateOfBirth;
+    private String avatar;
+    private int point;
+    private String membershipTier;
+    private double discountRate;
+    private String benefits;
+}

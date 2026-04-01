@@ -1,0 +1,33 @@
+@startuml
+start
+:Khách hàng vào profile.html;
+:ProfileService.loadProfile() hoặc renderProfile();
+:Gọi GET /api/users/me;
+:UserController.getMyProfile();
+:UserServiceImpl.getMyProfile(username);
+
+:ICustomerRepository.findByUsername(username);
+:UserServiceImpl.refreshTier();
+    :IMembershipTierRepository.findTopByMinPointLessThanEqualOrderByMinPointDesc(currentPoint);
+    :Nếu tìm thấy → customer.setMembershipTier(tier);
+
+:Xây dựng UserProfileResponse chứa:
+    • membershipTier (Bronze / Silver / Gold / Platinum)
+    • point (điểm hiện tại)
+    • discountRate (% giảm giá)
+    • benefits (quyền lợi)
+
+:Frontend hiển thị phần "Hạng thành viên":
+    - Tier badge + tên hạng
+    - Điểm tích lũy hiện tại
+    - Mức ưu đãi giảm giá (%)
+    - Quyền lợi đang áp dụng (benefits)
+
+:Người dùng có thể thấy rõ:
+    - Hạng hiện tại và tiến độ lên hạng tiếp theo
+    - Số điểm cần tích thêm để lên hạng
+    - Giảm giá sẽ được áp dụng khi đặt phòng tiếp theo
+
+:Khi thanh toán thành công → điểm tự động tăng → tier tự động refresh;
+stop
+@enduml

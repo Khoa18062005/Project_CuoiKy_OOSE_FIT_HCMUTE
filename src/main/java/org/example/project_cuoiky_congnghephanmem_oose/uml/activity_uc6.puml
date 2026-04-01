@@ -1,0 +1,26 @@
+@startuml
+start
+:Người dùng có booking pending → nhấn "Thanh toán" hoặc từ payment-result;
+:PaymentController.createPaymentUrl();
+:PaymentServiceImpl.createVnPayUrl(username, bookingId, ipAddress);
+:Kiểm tra quyền sở hữu booking + trạng thái pending + chưa hết hạn;
+:Hủy payment pending cũ (nếu có);
+:Tạo Payment mới (status=pending, transactionCode);
+:Gọi VnPayUtil.createPaymentUrl() → sinh link VNPay;
+:Trả PaymentUrlResponse;
+
+:Frontend redirect sang VNPay;
+:VNPay xử lý thanh toán → redirect về /api/payments/vnpay-return;
+:PaymentServiceImpl.handleVnPayReturn();
+if (responseCode == "00"?) then (yes)
+    :Cập nhật payment = success, booking = confirmed;
+    :Tính earnedPoint + cập nhật MembershipTier;
+    :Gửi email xác nhận;
+    :Redirect payment-result.html?status=success;
+else (no)
+    :Cập nhật payment = failed;
+    :Nếu hết hạn → booking = cancelled;
+    :Redirect payment-result.html?status=failed;
+endif
+stop
+@enduml

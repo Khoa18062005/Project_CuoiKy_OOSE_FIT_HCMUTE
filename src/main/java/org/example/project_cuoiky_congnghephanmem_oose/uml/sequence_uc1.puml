@@ -1,0 +1,28 @@
+@startuml
+skinparam sequenceArrowThickness 2
+actor "Người dùng" as User
+participant "room.html\n+ RoomSearchService" as Frontend
+participant "RoomController" as Controller
+participant "RoomServiceImpl" as Service
+participant "IRoomRepository" as Repo
+
+User -> Frontend: 1. Mở room.html hoặc click "Phòng trống"
+Frontend -> Frontend: 2. setMinDate() + bindEvents()
+alt Người dùng chỉ xem phòng trống (không search)
+    Frontend -> Controller: 3. GET /api/rooms
+else Người dùng tìm kiếm theo điều kiện
+    User -> Frontend: 4. Chọn ngày, số phòng, số khách, loại phòng
+    Frontend -> Controller: 5. GET /api/rooms/search?checkin=...&checkout=...
+end
+
+Controller -> Service: 6. searchAvailableRooms(request) hoặc getAvailableRooms()
+Service -> Service: 7. validateSearchRequest()
+Service -> Repo: 8. findAvailableRooms(checkin, checkout, roomType, guestsPerRoom)
+Repo --> Service: 9. List<Rooms> (JPQL query)
+Service -> Service: 10. tính totalFound, enough, warning
+Service -> Service: 11. convert sang List<RoomResponse>
+Service --> Controller: 12. RoomSearchResponse
+Controller --> Frontend: 13. 200 OK + JSON
+Frontend -> Frontend: 14. renderRooms(result) → tạo các room-card-beauty
+Frontend --> User: 15. Hiển thị danh sách phòng trống
+@enduml

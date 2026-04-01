@@ -1,0 +1,13 @@
+@startuml
+start
+:Người dùng vào profile.html → phần Lịch sử đặt phòng;
+:ProfileService.loadBookingHistory();
+:Gửi GET /api/users/me/bookings;
+:UserController.getMyBookings();
+:UserServiceImpl.getMyBookingHistory(username);
+:IBookingRepository.findByCustomerUserIDOrderByBookingDateDesc();
+:Với mỗi booking: syncExpiredBooking() (nếu pending hết hạn → cancelled);
+:toBookingHistory() → map Booking thành BookingHistoryResponse;
+:Frontend renderBookingHistory() → hiển thị booking item với trạng thái màu sắc, danh sách phòng, tổng tiền, nút "Thanh toán lại" nếu canRepay;
+stop
+@enduml

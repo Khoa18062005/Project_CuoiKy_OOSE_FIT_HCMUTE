@@ -1,0 +1,14 @@
+@startuml
+participant "PaymentServiceImpl" as PaymentService
+participant "EmailServiceImpl" as EmailService
+participant "JavaMailSender" as MailSender
+
+PaymentService -> PaymentService: 1. handleVnPayReturn() → responseCode=="00"
+PaymentService -> PaymentService: 2. Cập nhật payment & booking
+PaymentService -> PaymentService: 3. Tính earnedPoint + update tier
+PaymentService -> EmailService: 4. sendBookingConfirmationEmail(customer, booking, payment)
+EmailService -> EmailService: 5. Tạo MimeMessage + build HTML (room table)
+EmailService -> MailSender: 6. send(mimeMessage)
+MailSender --> EmailService: 7. Email sent successfully
+EmailService --> PaymentService: 8. Hoàn tất gửi mail
+@enduml

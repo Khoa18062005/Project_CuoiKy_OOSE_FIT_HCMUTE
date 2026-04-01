@@ -1,0 +1,15 @@
+@startuml
+start
+:Người dùng vào profile.html;
+:ProfileService.loadProfile() → GET /api/users/me;
+:Nhập thông tin mới (username, email, phone, dateOfBirth);
+:Nhấn "Lưu thay đổi";
+:handleUpdateProfile() → PUT /api/users/me;
+:UserServiceImpl.updateMyProfile();
+:Cập nhật các trường có giá trị;
+:ICustomerRepository.save();
+:Gọi lại getMyProfile() → trả dữ liệu mới;
+:Frontend renderProfile() + dispatch event "profile-updated";
+:Header.js cập nhật lại username + avatar;
+stop
+@enduml

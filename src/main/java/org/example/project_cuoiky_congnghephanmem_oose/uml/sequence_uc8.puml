@@ -1,0 +1,21 @@
+@startuml
+actor "Khách hàng" as User
+participant "ProfileService" as Frontend
+participant "UserController" as Controller
+participant "UserServiceImpl" as Service
+participant "IBookingRepository" as BookingRepo
+participant "IPaymentRepository" as PaymentRepo
+
+User -> Frontend: 1. Vào tab Lịch sử đặt phòng
+Frontend -> Controller: 2. GET /api/users/me/bookings
+Controller -> Service: 3. getMyBookingHistory(username)
+Service -> BookingRepo: 4. findByCustomerUserIDOrderByBookingDateDesc(userId)
+loop Mỗi booking
+    Service -> Service: 5. syncExpiredBooking(booking)
+end
+Service -> Service: 6. map → List<BookingHistoryResponse> (toBookingHistory)
+Service --> Controller: 7. List<BookingHistoryResponse>
+Controller --> Frontend: 8. JSON
+Frontend -> Frontend: 9. renderBookingHistory() → tạo article.booking-item
+Frontend --> User: 10. Hiển thị đầy đủ lịch sử booking
+@enduml

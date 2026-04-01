@@ -1,0 +1,40 @@
+@startuml
+actor "Khách hàng" as User
+participant "Frontend (RoomSearch / PaymentResult)" as Frontend
+participant "PaymentController" as Controller
+participant "PaymentServiceImpl" as Service
+participant "VnPayUtil" as VNPayUtil
+participant "IBookingRepository" as BookingRepo
+participant "IPaymentRepository" as PaymentRepo
+participant "IEmailService" as EmailService
+
+User -> Frontend: 1. Nhấn thanh toán booking
+Frontend -> Controller: 2. POST /api/payments/vnpay/{bookingId}
+Controller -> Service: 3. createVnPayUrl(username, bookingId, ip)
+Service -> BookingRepo: 4. findById(bookingId)
+Service -> Service: 5. syncBookingState() + kiểm tra pending + chưa hết hạn
+Service -> PaymentRepo: 6. Hủy payment pending cũ
+Service -> Service: 7. Tạo Payment mới (pending)
+Service -> PaymentRepo: 8. save(payment)
+Service -> VNPayUtil: 9. createPaymentUrl(bookingId, amount, ip)
+Service --> Controller: 10. PaymentUrlResponse
+Controller --> Frontend: 11. paymentUrl
+Frontend -> Frontend: 12. window.location = paymentUrl
+
+... VNPay xử lý thanh toán ...
+
+VNPay -> Controller: 13. GET /api/payments/vnpay-return?params...
+Controller -> Service: 14. handleVnPayReturn(params)
+Service -> VNPayUtil: 15. validateReturn()
+alt Thanh toán thành công (00)
+    Service -> Service: 16. payment=success, booking=confirmed
+    Service -> Service: 17. tính earnedPoint + update tier
+    Service -> EmailService: 18. sendBookingConfirmationEmail()
+    Service --> Controller: 19. result success
+    Controller --> Frontend: 20. redirect payment-result.html?status=success
+else Thất bại
+    Service -> Service: 21. payment=failed
+    Service --> Controller: 22. result failed
+    Controller --> Frontend: 23. redirect ?status=failed
+end
+@enduml
