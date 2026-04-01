@@ -1,0 +1,36 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam ParticipantPadding 20
+
+actor "Manager" as User
+participant "AdminDashboard\n(JS class)" as Dashboard
+participant "ApiService\n(JS class)" as ApiService
+participant "JwtAuthFilter" as JwtFilter
+participant "ManagerController" as Controller
+participant "PotentialCustomerServiceImpl" as PotentialService
+participant "IBookingRepository" as BookingRepo
+
+== Xem khách hàng tiềm năng ==
+User -> Dashboard: 1. Click tab "Khách hàng tiềm năng"
+Dashboard -> Dashboard: 2. switchTab() → loadPotentialCustomers()
+Dashboard -> ApiService: 3. getPotentialCustomers()
+ApiService -> JwtFilter: 4. GET /api/manager/potential-customers
+JwtFilter -> JwtFilter: 5. validateToken() + extractRole()
+JwtFilter -> Controller: 6. Forward request
+Controller -> PotentialService: 7. getPotentialCustomers()
+PotentialService -> BookingRepo: 8. findPotentialCustomers()
+BookingRepo --> PotentialService: 9. List<Object[]>
+PotentialService -> PotentialService: 10. Map sang DTO
+PotentialService --> Controller: 11. Response
+Controller --> ApiService: 12. 200 OK + JSON
+ApiService --> Dashboard: 13. customers[]
+Dashboard -> Dashboard: 14. Tính điểm + phân hạng
+Dashboard -> Dashboard: 15. Render bảng
+Dashboard --> User: 16. Hiển thị danh sách
+
+== Làm mới ==
+User -> Dashboard: 17. Click "Làm mới"
+Dashboard -> Dashboard: 18. loadPotentialCustomers()
+Dashboard --> User: 19. Cập nhật danh sách
+
+@enduml

@@ -1,0 +1,47 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam ParticipantPadding 20
+
+actor "Manager" as User
+participant "AdminDashboard\n(JS class)" as Dashboard
+participant "ApiService\n(JS class)" as ApiService
+participant "JwtAuthFilter" as JwtFilter
+participant "ManagerController" as Controller
+participant "BookingListServiceImpl" as BookingService
+participant "IBookingRepository" as BookingRepo
+
+== Xem danh sách Booking ==
+User -> Dashboard: 1. Click tab "DS Booking"
+Dashboard -> Dashboard: 2. switchTab() → loadBookings()
+Dashboard -> ApiService: 3. getBookings('all', '')
+ApiService -> JwtFilter: 4. GET /api/manager/bookings
+JwtFilter -> JwtFilter: 5. validateToken() + extractRole()
+JwtFilter -> Controller: 6. Forward request
+Controller -> BookingService: 7. getBookings("all", "")
+BookingService -> BookingRepo: 8. findBookingsWithFilter(null, null)
+BookingRepo --> BookingService: 9. List<Booking>
+BookingService --> Controller: 10. List<BookingListResponse>
+Controller --> ApiService: 11. 200 OK + JSON
+ApiService --> Dashboard: 12. bookings[]
+Dashboard -> Dashboard: 13. Render bảng booking
+Dashboard --> User: 14. Hiển thị danh sách
+
+== Filter & Search ==
+User -> Dashboard: 15. Chọn filter / nhập keyword
+Dashboard -> ApiService: 16. getBookings('confirmed', 'nguyen')
+ApiService -> Controller: 17. GET /api/manager/bookings
+Controller -> BookingService: 18. getBookings("confirmed", "nguyen")
+BookingService -> BookingRepo: 19. findBookingsWithFilter(...)
+BookingRepo --> BookingService: 20. List đã lọc
+BookingService --> Controller: 21. Response
+Controller --> ApiService: 22. JSON
+ApiService --> Dashboard: 23. bookings[]
+Dashboard -> Dashboard: 24. Render lại
+Dashboard --> User: 25. Hiển thị kết quả
+
+== Xem chi tiết ==
+User -> Dashboard: 26. Click xem chi tiết
+Dashboard -> Dashboard: 27. showBookingDetailModal()
+Dashboard --> User: 28. Hiển thị modal
+
+@enduml
