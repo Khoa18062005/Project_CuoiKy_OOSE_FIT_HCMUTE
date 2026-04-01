@@ -1,4 +1,3 @@
-// service/manager/impl/RevenueServiceImpl.java
 package org.example.project_cuoiky_congnghephanmem_oose.service.manager.impl;
 
 import org.example.project_cuoiky_congnghephanmem_oose.dto.response.RevenueResponse;
@@ -7,9 +6,11 @@ import org.example.project_cuoiky_congnghephanmem_oose.repository.IBookingReposi
 import org.example.project_cuoiky_congnghephanmem_oose.service.manager.IRevenueService;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,36 +28,61 @@ public class RevenueServiceImpl implements IRevenueService {
         LocalDateTime from = getFromDate(period);
         LocalDateTime to = LocalDateTime.now();
 
-        // Lấy booking confirmed trong khoảng thời gian
+        // 1. Lấy booking
         List<Booking> bookings = (from == null)
                 ? bookingRepository.findByStatus("confirmed")
                 : bookingRepository.findByBookingDateBetweenAndStatus(from, to, "confirmed");
 
-        // Tính tổng doanh thu
-        double totalRevenue = bookings.stream()
-                .mapToDouble(Booking::getTotalPrice)
-                .sum();
-
-        // Số đơn booking
+        // 2. Tính các chỉ số
+        double totalRevenue = bookings.stream().mapToDouble(Booking::getTotalPrice).sum();
         long totalBookings = bookings.size();
-
-        // Số phòng đã đặt (đếm bookingDetails)
         long bookedRoomsCount = bookings.stream()
                 .mapToLong(b -> b.getBookingDetails() != null ? b.getBookingDetails().size() : 0)
                 .sum();
-
-        // Doanh thu trung bình / ngày
         long days = getDays(period);
         double avgDailyRevenue = days > 0 ? totalRevenue / days : totalRevenue;
 
-        // Chart data — group theo ngày
+        // 3. KHỞI TẠO TRỤC THỜI GIAN
+        Map<String, Double> grouped = new LinkedHashMap<>();
         DateTimeFormatter formatter = getFormatter(period);
-        Map<String, Double> grouped = new TreeMap<>();
-        for (Booking b : bookings) {
-            String dateKey = b.getBookingDate().format(formatter);
-            grouped.merge(dateKey, b.getTotalPrice(), Double::sum);
+        LocalDate today = LocalDate.now();
+
+        switch (period) {
+            case "week":
+                // Lấy ra ngày Thứ 2 của tuần hiện tại
+                LocalDate startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+                // Khởi tạo từ Thứ 2 đến Chủ Nhật (7 ngày)
+                for (int i = 0; i < 7; i++) {
+                    grouped.put(startOfWeek.plusDays(i).format(formatter), 0.0);
+                }
+                break;
+            case "month":
+                int daysInMonth = today.lengthOfMonth();
+                for (int i = 1; i <= daysInMonth; i++) {
+                    grouped.put(today.withDayOfMonth(i).format(formatter), 0.0);
+                }
+                break;
+            case "year":
+                for (int i = 1; i <= 12; i++) {
+                    grouped.put(today.withMonth(i).format(formatter), 0.0);
+                }
+                break;
+            default:
+                grouped = new TreeMap<>();
+                break;
         }
 
+        // 4. ĐỔ DỮ LIỆU
+        for (Booking b : bookings) {
+            String dateKey = b.getBookingDate().format(formatter);
+            if (grouped.containsKey(dateKey)) {
+                grouped.put(dateKey, grouped.get(dateKey) + b.getTotalPrice());
+            } else if ("all".equals(period)) {
+                grouped.merge(dateKey, b.getTotalPrice(), Double::sum);
+            }
+        }
+
+        // 5. Build Response
         List<RevenueResponse.RevenueByDate> chartData = grouped.entrySet().stream()
                 .map(e -> new RevenueResponse.RevenueByDate(e.getKey(), e.getValue()))
                 .collect(Collectors.toList());
@@ -67,10 +93,11 @@ public class RevenueServiceImpl implements IRevenueService {
     private LocalDateTime getFromDate(String period) {
         LocalDateTime now = LocalDateTime.now();
         return switch (period) {
-            case "week"  -> now.minusDays(7);
+            case "week"  -> now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+                    .withHour(0).withMinute(0).withSecond(0).withNano(0); // Bắt đầu từ 00:00 Thứ 2
             case "month" -> now.withDayOfMonth(1).toLocalDate().atStartOfDay();
             case "year"  -> now.withDayOfYear(1).toLocalDate().atStartOfDay();
-            default      -> null; // "all"
+            default      -> null;
         };
     }
 
