@@ -26,9 +26,14 @@ else
     Service -> Jwt: 11. generateToken(username, role)
     Service -> Service: 12. new AuthResponse("Đăng nhập thành công!", token, username, role)
     Service --> Controller: 13. AuthResponse
-    Controller --> JSService: 14. 200 OK + JSON
+    Controller --> JSService: 14. 200 OK + JSON (token, username, role)
     JSService -> JSService: 15. localStorage.setItem('jwt_token', token)
     JSService -> JSService: 16. localStorage.setItem('current_user', username)
-    JSService --> Frontend: 17. notify success + redirect index.html
+    JSService -> JSService: 17. localStorage.setItem('role', role)
+    alt role === 'MANAGER'
+        JSService --> Frontend: 18. notify success + redirect admin.html
+    else role === 'CUSTOMER'
+        JSService --> Frontend: 18. notify success + redirect index.html
+    end
 end
 @enduml

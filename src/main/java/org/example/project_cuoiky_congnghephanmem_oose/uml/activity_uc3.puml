@@ -10,9 +10,13 @@ if (userRepository.findByUsername hoặc findByEmail?) then (tìm thấy)
     if (passwordEncoder.matches?) then (đúng)
         :Xác định role (MANAGER/CUSTOMER);
         :JwtUtil.generateToken(username, role);
-        :Trả AuthResponse + token;
-        :Frontend lưu JWT + current_user vào localStorage;
-        :notify success → redirect index.html;
+        :Trả AuthResponse + token + role;
+        :Frontend lưu JWT + current_user + role vào localStorage;
+        if (role === 'MANAGER'?) then (đúng)
+            :notify success → redirect admin.html;
+        else (không)
+            :notify success → redirect index.html;
+        endif
     else (sai)
         :throw "Mật khẩu không đúng!";
         :notify lỗi;
