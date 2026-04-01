@@ -24,7 +24,7 @@ alt Sai mật khẩu
 else
     Service -> Service: 10. role = (roleID==2) ? "MANAGER" : "CUSTOMER"
     Service -> Jwt: 11. generateToken(username, role)
-    Service -> Service: 12. new AuthResponse("Đăng nhập thành công!", token, username)
+    Service -> Service: 12. new AuthResponse("Đăng nhập thành công!", token, username, role)
     Service --> Controller: 13. AuthResponse
     Controller --> JSService: 14. 200 OK + JSON
     JSService -> JSService: 15. localStorage.setItem('jwt_token', token)
