@@ -54,12 +54,6 @@ public class ManagerController {
         return ResponseEntity.ok(bookingListService.getBookings(status, keyword));
     }
 
-    // GET /api/manager/rooms
-    @GetMapping("/rooms")
-    public ResponseEntity<List<RoomDetailResponse>> getAllRooms() {
-        return ResponseEntity.ok(roomManagementService.getAllRooms());
-    }
-
     // PUT /api/manager/rooms/{roomID}
     @PutMapping("/rooms/{roomID}")
     public ResponseEntity<RoomDetailResponse> updateRoom(
