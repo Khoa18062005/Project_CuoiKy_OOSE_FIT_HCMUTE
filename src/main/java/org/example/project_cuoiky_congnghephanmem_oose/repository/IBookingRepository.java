@@ -12,4 +12,9 @@ public interface IBookingRepository extends JpaRepository<Booking, Integer> {
     List<Booking> findByCustomerUserIDOrderByBookingDateDesc(int userId);
 
     List<Booking> findByStatusIgnoreCaseAndExpiredAtBefore(String status, LocalDateTime expiredAt);
+
+    List<Booking> findByBookingDateBetweenAndStatus(
+            LocalDateTime from, LocalDateTime to, String status
+    );
+    List<Booking> findByStatus(String status);
 }

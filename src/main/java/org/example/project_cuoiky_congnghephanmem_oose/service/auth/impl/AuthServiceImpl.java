@@ -61,7 +61,7 @@ public class AuthServiceImpl implements IAuthService {
 
         customerRepository.save(customer); // ← cần ICustomerRepository
 
-        return new AuthResponse("Đăng ký thành công!", null, customer.getUsername());
+        return new AuthResponse("Đăng ký thành công!", null, customer.getUsername(), "CUSTOMER");
     }
 
     @Override
@@ -79,7 +79,7 @@ public class AuthServiceImpl implements IAuthService {
 
         String token = jwtUtil.generateToken(user.getUsername(), role); // ← truyền role
 
-        return new AuthResponse("Đăng nhập thành công!", token, user.getUsername());
+    return new AuthResponse("Đăng nhập thành công!", token, user.getUsername(), role);
     }
     // Triển khai logic quên mật khẩu
     @Override
