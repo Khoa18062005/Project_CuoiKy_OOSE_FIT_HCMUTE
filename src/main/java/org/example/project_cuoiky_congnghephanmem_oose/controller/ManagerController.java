@@ -53,12 +53,4 @@ public class ManagerController {
             @RequestParam(required = false) String keyword) {
         return ResponseEntity.ok(bookingListService.getBookings(status, keyword));
     }
-
-    // PUT /api/manager/rooms/{roomID}
-    @PutMapping("/rooms/{roomID}")
-    public ResponseEntity<RoomDetailResponse> updateRoom(
-            @PathVariable int roomID,
-            @RequestBody UpdateRoomRequest request) {
-        return ResponseEntity.ok(roomManagementService.updateRoom(roomID, request));
-    }
 }

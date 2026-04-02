@@ -1,0 +1,94 @@
+@startuml RoomManagement_Activity
+
+|Frontend (JS)|
+|Backend (Spring Boot)|
+
+|Frontend (JS)|
+start
+
+:Khởi tạo date picker = hôm nay;
+:Gọi loadRooms(today);
+:Gửi GET /api/rooms?date={date} + JWT;
+
+|Backend (Spring Boot)|
+:JwtAuthFilter xác thực token;
+
+if (JWT hợp lệ?) then (Không)
+    :Trả về 401 Unauthorized;
+    |Frontend (JS)|
+    :Redirect → login.html;
+    stop
+else (Có)
+    |Backend (Spring Boot)|
+    :RoomController.getRooms(date);
+    :RoomManagementServiceImpl\n.getRoomsByDate(dateParam);
+    fork
+        :IRoomRepository.findAll();
+    fork again
+        :IBookingRepository\n.findBookedRoomIdsByDate(targetDate);
+    end fork
+
+    :Duyệt qua từng phòng;
+    if (status == "maintenance"\nhoặc "inactive"?) then (Có)
+        :Giữ nguyên status gốc;
+    else (Không)
+        if (roomID nằm trong\nbookedRoomIds?) then (Có)
+            :status = "booked";
+        else (Không)
+            :status = "available";
+        end if
+    end if
+
+    :Map sang List<RoomDetailResponse>;
+    :Trả về 200 OK + JSON;
+
+    |Frontend (JS)|
+    :Lưu vào roomsData[];
+    :Cập nhật thống kê\n(total / available / booked / maintenance);
+    :renderRoomsList();
+
+    if (Người dùng đổi ngày?) then (Có)
+        :Gọi lại loadRooms(newDate);
+        detach
+    else (Không)
+    end if
+
+    if (Người dùng chọn filter\ntrạng thái?) then (Có)
+        :renderRoomsList()\n— lọc client-side trên roomsData;
+    else (Không)
+    end if
+
+    if (Người dùng click\nvào card phòng?) then (Có)
+        :showRoomModal(room)\n— điền sẵn thông tin vào form;
+
+        :Người dùng chỉnh sửa\nloại phòng / trạng thái → bấm Lưu;
+        :Validate form + disable nút Lưu;
+        :Gửi PUT /api/rooms/{id} + JWT;
+
+        |Backend (Spring Boot)|
+        :RoomManagementServiceImpl\n.updateRoom(roomID, request);
+
+        if (status == "booked"?) then (Có)
+            :throw RuntimeException\n"Không được gán thủ công";
+            :Trả về lỗi 400/500;
+            |Frontend (JS)|
+            :Alert: Cập nhật thất bại;
+            :Enable lại nút Lưu;
+        else (Không)
+            |Backend (Spring Boot)|
+            :IRoomRepository.findById(roomID);
+            :room.setRoomType(type)\nroom.setStatus(status);
+            :IRoomRepository.save(room);
+            :Trả về 200 OK + RoomDetailResponse;
+            |Frontend (JS)|
+            :Đóng modal;
+            :Alert: Cập nhật thành công;
+            :Gọi lại loadRooms(dateStr);
+        end if
+    else (Không)
+    end if
+
+    stop
+end if
+
+@enduml

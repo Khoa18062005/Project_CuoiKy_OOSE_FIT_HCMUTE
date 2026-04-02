@@ -1,0 +1,66 @@
+@startuml RoomManagement_Sequence
+
+actor Manager
+participant "Frontend (JS)" as FE
+participant "RoomController" as RC
+participant "RoomManagementService" as SV
+participant "IBookingRepository" as BR
+participant "IRoomRepository" as RR
+
+== Xem danh sách phòng theo ngày ==
+
+Manager -> FE : Mở tab Quản lý Phòng\n(chọn ngày trên date picker)
+FE -> RC : GET /api/rooms?date=yyyy-MM-dd\n[Bearer JWT]
+
+RC -> SV : getRoomsByDate(dateParam)
+SV -> BR : findBookedRoomIdsByDate(targetDate)
+BR --> SV : List<Integer> bookedRoomIds
+SV -> RR : findAll()
+RR --> SV : List<Rooms>
+
+loop Mỗi phòng
+    alt status == "maintenance" || "inactive"
+        SV -> SV : Giữ nguyên status gốc
+    else Phòng nằm trong bookedRoomIds
+        SV -> SV : status = "booked"
+    else
+        SV -> SV : status = "available"
+    end
+end
+
+SV --> RC : List<RoomDetailResponse>
+RC --> FE : 200 OK — JSON array
+FE -> FE : renderRoomsList()\nCập nhật stats (total/available/booked/maintenance)
+FE --> Manager : Hiển thị danh sách phòng + thống kê
+
+
+== Cập nhật thông tin phòng ==
+
+Manager -> FE : Click vào card phòng
+FE -> FE : showRoomModal(room)\nĐiền sẵn thông tin vào form
+FE --> Manager : Hiện modal chỉnh sửa
+
+Manager -> FE : Chọn loại phòng / trạng thái\nBấm Lưu
+FE -> FE : Validate form\nDisable nút Lưu
+
+FE -> RC : PUT /api/rooms/{id}\n[Bearer JWT]\nBody: {typeID, status}
+
+RC -> SV : updateRoom(roomID, request)
+
+alt status == "booked"
+    SV --> RC : throw RuntimeException\n"Không được gán thủ công"
+    RC --> FE : 500 / 400 Error
+    FE --> Manager : Alert: Cập nhật thất bại
+else
+    SV -> RR : findById(roomID)
+    RR --> SV : Rooms entity
+    SV -> SV : setRoomType(type)\nsetStatus(status)
+    SV -> RR : save(room)
+    RR --> SV : Rooms đã lưu
+    SV --> RC : RoomDetailResponse
+    RC --> FE : 200 OK — RoomDetailResponse
+    FE -> FE : Đóng modal\nGọi lại loadRooms(dateStr)
+    FE --> Manager : Alert: Cập nhật thành công\nDanh sách phòng được làm mới
+end
+
+@enduml
