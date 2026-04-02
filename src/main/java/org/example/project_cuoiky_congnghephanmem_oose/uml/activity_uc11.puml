@@ -1,0 +1,34 @@
+@startuml
+title Xem danh sách Booking
+
+start
+:Manager click tab "DS Booking khách hàng";
+:loadBookings(status='all', keyword='');
+:GET /api/manager/bookings;
+:BookingListServiceImpl.getBookings();
+:statusParam = null;
+:keywordParam = null;
+:findBookingsWithFilter(null, null);
+:Map sang BookingListResponse;
+:Render bảng booking;
+:Hiển thị danh sách booking;
+
+fork
+    :Manager đổi filter trạng thái;
+    :loadBookings(status mới);
+    :findBookingsWithFilter(status, null);
+    :Render lại bảng;
+fork again
+    :Manager nhập keyword tìm kiếm;
+    :loadBookings(status, keyword);
+    :findBookingsWithFilter(status, keyword);
+    :Render lại bảng;
+fork again
+    :Manager click xem chi tiết;
+    :showBookingDetailModal();
+    :Render modal chi tiết;
+    :Hiển thị modal;
+end fork
+
+stop
+@enduml

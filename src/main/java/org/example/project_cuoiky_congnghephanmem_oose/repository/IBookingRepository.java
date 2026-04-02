@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -48,4 +49,10 @@ public interface IBookingRepository extends JpaRepository<Booking, Integer> {
             @Param("status") String status,
             @Param("keyword") String keyword
     );
+
+    @Query("SELECT bd.room.roomID FROM BookingDetails bd " +
+            "WHERE bd.booking.status = 'confirmed' " +
+            "AND bd.checkinDate <= :today " +
+            "AND bd.checkoutDate > :today")
+    List<Integer> findBookedRoomIdsByDate(@Param("today") LocalDate today);
 }
