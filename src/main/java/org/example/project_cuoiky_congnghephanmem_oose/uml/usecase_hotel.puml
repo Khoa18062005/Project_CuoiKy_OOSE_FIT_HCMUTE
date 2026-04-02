@@ -31,7 +31,7 @@ rectangle "Hệ thống đặt phòng khách sạn" {
 
   package "Chức năng quản lý" {
     usecase "Xem danh sách booking\ncủa khách hàng" as UC11
-    usecase "Cập nhật trạng thái phòng\n(trống, đã đặt, bảo trì)" as UC12
+    usecase "Cập nhật trạng thái phòng\n(sẵn sàng, bảo trì, ngừng kinh doanh)" as UC12
     usecase "Điều chỉnh thông tin phòng\n(giá, loại, sức chứa)" as UC13
     usecase "Xem tổng doanh thu" as UC14
     usecase "Xem khách hàng tiềm năng" as UC15
